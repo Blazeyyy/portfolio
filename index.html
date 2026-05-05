@@ -2,991 +2,1180 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5"/>
 <title>Adith Krishna — Data Engineer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --bg: #050810;
-  --bg2: #080d1a;
-  --surface: #0d1526;
-  --surface2: #111c33;
-  --border: rgba(99,179,237,0.12);
-  --accent: #63b3ed;
-  --accent2: #4fd1c5;
-  --accent3: #f6ad55;
-  --text: #e2e8f0;
-  --muted: #718096;
-  --dim: #4a5568;
-  --glow: rgba(99,179,237,0.15);
-  --glow2: rgba(79,209,197,0.1);
+/* ═══════════════════════════════════════════════
+   ROOT / TOKENS
+═══════════════════════════════════════════════ */
+:root{
+  --ink:#03060f;
+  --ink2:#070d1c;
+  --panel:#0b1323;
+  --panel2:#0f1b30;
+  --border:rgba(56,189,248,0.1);
+  --border2:rgba(56,189,248,0.2);
+  --sky:#38bdf8;
+  --teal:#2dd4bf;
+  --amber:#fbbf24;
+  --text:#e2e8f0;
+  --muted:#94a3b8;
+  --dim:#475569;
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'Space Grotesk',sans-serif;
+  --font-code:'Fira Code',monospace;
 }
 
 *{margin:0;padding:0;box-sizing:border-box;}
-
-html{scroll-behavior:smooth;}
+html{scroll-behavior:smooth;font-size:16px;}
 
 body{
-  background:var(--bg);
+  background:var(--ink);
   color:var(--text);
-  font-family:'JetBrains Mono',monospace;
-  font-size:14px;
+  font-family:var(--font-body);
   line-height:1.7;
   overflow-x:hidden;
 }
 
-/* ─── NOISE OVERLAY ─── */
-body::before{
-  content:'';
-  position:fixed;
-  inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events:none;
-  z-index:9999;
-  opacity:0.4;
+/* noise */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:.5;
 }
 
-/* ─── SCROLLBAR ─── */
+/* scrollbar */
 ::-webkit-scrollbar{width:3px;}
-::-webkit-scrollbar-track{background:var(--bg);}
-::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
+::-webkit-scrollbar-track{background:var(--ink);}
+::-webkit-scrollbar-thumb{background:var(--sky);border-radius:2px;}
 
-/* ─── CURSOR ─── */
-* { cursor: none !important; }
-.cursor{
-  position:fixed;width:8px;height:8px;
-  background:var(--accent);border-radius:50%;
-  pointer-events:none;z-index:99999;
-  transform:translate(-50%,-50%);
-  transition:width 0.2s,height 0.2s,background 0.2s;
-  mix-blend-mode:screen;
+/* ═══════════════════════════════════════════════
+   CUSTOM CURSOR (desktop only)
+═══════════════════════════════════════════════ */
+@media(pointer:fine){
+  *{cursor:none!important;}
+  #cur{position:fixed;width:10px;height:10px;background:var(--sky);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);mix-blend-mode:screen;transition:width .2s,height .2s,background .2s;}
+  #cur-r{position:fixed;width:36px;height:36px;border:1px solid rgba(56,189,248,.35);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);}
+  #cur.h{width:20px;height:20px;background:var(--teal);}
+  #cur-r.h{width:54px;height:54px;border-color:var(--teal);}
 }
-.cursor-ring{
-  position:fixed;width:32px;height:32px;
-  border:1px solid rgba(99,179,237,0.4);
-  border-radius:50%;pointer-events:none;z-index:99998;
-  transform:translate(-50%,-50%);
-  transition:transform 0.08s linear,width 0.3s,height 0.3s,border-color 0.3s;
-}
-.cursor.hovered{width:16px;height:16px;background:var(--accent2);}
-.cursor-ring.hovered{width:48px;height:48px;border-color:var(--accent2);}
 
-/* ─── GRID BACKGROUND ─── */
-.grid-bg{
+/* ═══════════════════════════════════════════════
+   GRID BG
+═══════════════════════════════════════════════ */
+.g-bg{
   position:fixed;inset:0;
   background-image:
-    linear-gradient(rgba(99,179,237,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99,179,237,0.03) 1px, transparent 1px);
-  background-size:60px 60px;
+    linear-gradient(rgba(56,189,248,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(56,189,248,.025) 1px,transparent 1px);
+  background-size:72px 72px;
   pointer-events:none;z-index:0;
 }
 
-/* ─── NAV ─── */
+/* ═══════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════ */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:1000;
-  padding:20px 48px;
-  display:flex;justify-content:space-between;align-items:center;
-  background:linear-gradient(to bottom, rgba(5,8,16,0.95), transparent);
-  backdrop-filter:blur(12px);
+  padding:0 clamp(20px,5vw,64px);
+  height:68px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(3,6,15,.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
 }
 .nav-logo{
-  font-family:'Syne',sans-serif;font-weight:800;font-size:18px;
-  color:var(--text);letter-spacing:-0.5px;
+  font-family:var(--font-display);
+  font-size:26px;letter-spacing:2px;
+  color:var(--text);
+  display:flex;align-items:center;gap:4px;
 }
-.nav-logo span{color:var(--accent);}
-.nav-links{display:flex;gap:32px;list-style:none;}
+.nav-logo .dot{color:var(--sky);}
+.nav-links{display:flex;gap:clamp(16px,3vw,36px);list-style:none;}
 .nav-links a{
   color:var(--muted);text-decoration:none;
-  font-size:11px;letter-spacing:0.15em;text-transform:uppercase;
-  transition:color 0.2s;
-  position:relative;
+  font-size:12px;letter-spacing:.15em;text-transform:uppercase;
+  font-weight:500;transition:color .2s;
+  position:relative;padding-bottom:4px;
 }
 .nav-links a::after{
-  content:'';position:absolute;bottom:-4px;left:0;right:0;
-  height:1px;background:var(--accent);
+  content:'';position:absolute;bottom:0;left:0;right:0;
+  height:1px;background:var(--sky);
   transform:scaleX(0);transform-origin:left;
-  transition:transform 0.3s;
+  transition:transform .3s;
 }
 .nav-links a:hover{color:var(--text);}
 .nav-links a:hover::after{transform:scaleX(1);}
-.nav-badge{
-  font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
-  color:var(--accent2);border:1px solid rgba(79,209,197,0.3);
-  padding:4px 12px;border-radius:20px;
-  background:rgba(79,209,197,0.05);
+.nav-avail{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--teal);
+  border:1px solid rgba(45,212,191,.25);
+  padding:6px 14px;border-radius:24px;
+  background:rgba(45,212,191,.04);
 }
-.nav-badge::before{content:'● ';font-size:8px;animation:blink 2s infinite;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
-
-/* ─── HERO ─── */
-#hero{
-  min-height:100vh;
-  display:flex;align-items:center;
-  padding:120px 48px 80px;
-  position:relative;overflow:hidden;
+.nav-avail::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--teal);
+  animation:pulse 2s infinite;
 }
-
-.hero-pipeline{
-  position:absolute;right:-100px;top:50%;transform:translateY(-50%);
-  width:600px;height:600px;
-  opacity:0.06;
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(45,212,191,.4);}50%{opacity:.5;box-shadow:0 0 0 4px rgba(45,212,191,0);}}
+.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:8px;}
+.nav-ham span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:.3s;}
+.mob-menu{
+  display:none;position:fixed;inset:0;top:68px;
+  background:rgba(3,6,15,.98);backdrop-filter:blur(20px);
+  z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:36px;
 }
-
-.hero-glow{
-  position:absolute;
-  width:600px;height:600px;
-  background:radial-gradient(circle, rgba(99,179,237,0.08) 0%, transparent 70%);
-  top:50%;left:50%;transform:translate(-30%,-50%);
-  pointer-events:none;
+.mob-menu a{
+  font-family:var(--font-display);font-size:40px;letter-spacing:2px;
+  color:var(--text);text-decoration:none;transition:color .2s;
 }
-
-.hero-content{
-  position:relative;z-index:1;
-  max-width:780px;
+.mob-menu a:hover{color:var(--sky);}
+.mob-menu.open{display:flex;}
+@media(max-width:768px){
+  .nav-links,.nav-avail{display:none;}
+  .nav-ham{display:flex;}
 }
 
-.hero-eyebrow{
-  font-size:11px;letter-spacing:0.2em;text-transform:uppercase;
-  color:var(--accent);margin-bottom:24px;
+/* ═══════════════════════════════════════════════
+   SECTIONS BASE
+═══════════════════════════════════════════════ */
+section{position:relative;padding:clamp(60px,10vw,120px) clamp(20px,5vw,80px);}
+.sec-label{
+  font-family:var(--font-code);
+  font-size:11px;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--sky);margin-bottom:16px;
   display:flex;align-items:center;gap:12px;
 }
-.hero-eyebrow::before{
-  content:'';display:block;width:40px;height:1px;background:var(--accent);
+.sec-label::before{content:'';display:block;width:32px;height:1px;background:var(--sky);}
+.sec-title{
+  font-family:var(--font-display);
+  font-size:clamp(44px,7vw,80px);
+  letter-spacing:2px;line-height:.95;
+  color:var(--text);margin-bottom:60px;
+}
+.sec-title span{color:transparent;-webkit-text-stroke:1px rgba(226,232,240,.25);}
+
+/* ═══════════════════════════════════════════════
+   REVEAL
+═══════════════════════════════════════════════ */
+.rv{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease;}
+.rv.vis{opacity:1;transform:none;}
+.rv-l{opacity:0;transform:translateX(-40px);transition:opacity .7s ease,transform .7s ease;}
+.rv-l.vis{opacity:1;transform:none;}
+.rv-r{opacity:0;transform:translateX(40px);transition:opacity .7s ease,transform .7s ease;}
+.rv-r.vis{opacity:1;transform:none;}
+
+/* ═══════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════ */
+#hero{
+  min-height:100dvh;
+  display:grid;
+  grid-template-columns:1fr;
+  align-items:center;
+  padding-top:100px;
+  overflow:hidden;
 }
 
-.hero-name{
-  font-family:'Syne',sans-serif;font-weight:800;
-  font-size:clamp(52px,8vw,96px);
-  line-height:0.95;letter-spacing:-3px;
-  color:var(--text);margin-bottom:8px;
+/* Diagonal split bg */
+#hero::before{
+  content:'';position:absolute;
+  top:0;right:0;bottom:0;width:42%;
+  background:var(--panel);
+  clip-path:polygon(12% 0,100% 0,100% 100%,0 100%);
+  z-index:0;
 }
-.hero-name .line2{
+@media(max-width:900px){#hero::before{display:none;}}
+
+.hero-inner{
+  position:relative;z-index:1;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:60px;
+  align-items:center;
+  max-width:1400px;margin:0 auto;width:100%;
+}
+@media(max-width:900px){.hero-inner{grid-template-columns:1fr;gap:40px;}}
+
+.hero-left{}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-code);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--sky);margin-bottom:28px;
+}
+.hero-tag::before{content:'▶';font-size:8px;}
+
+h1.hero-name{
+  font-family:var(--font-display);
+  font-size:clamp(68px,12vw,140px);
+  letter-spacing:3px;line-height:.9;
+  margin-bottom:12px;
+}
+h1.hero-name .ln1{color:var(--text);}
+h1.hero-name .ln2{
   color:transparent;
-  -webkit-text-stroke:1px rgba(99,179,237,0.4);
+  -webkit-text-stroke:2px rgba(56,189,248,.5);
 }
 
-.hero-title{
-  font-family:'Instrument Serif',serif;font-style:italic;
-  font-size:clamp(18px,2.5vw,26px);
-  color:var(--muted);margin:20px 0 32px;
-  letter-spacing:0.02em;
+.hero-role{
+  font-family:var(--font-body);font-weight:300;
+  font-size:clamp(16px,2.5vw,22px);
+  color:var(--muted);margin:24px 0 32px;
+  border-left:3px solid var(--sky);padding-left:16px;
+  line-height:1.5;
 }
-.hero-title strong{color:var(--accent2);font-style:normal;font-family:'JetBrains Mono',monospace;font-size:0.8em;}
+.hero-role strong{color:var(--sky);font-weight:600;}
 
 .hero-desc{
-  font-size:14px;color:var(--muted);
+  font-size:15px;color:var(--muted);
   max-width:520px;line-height:1.8;
   margin-bottom:48px;
-  border-left:2px solid var(--border);
-  padding-left:20px;
 }
 
-.hero-cta{display:flex;gap:16px;flex-wrap:wrap;align-items:center;}
-
-.btn-primary{
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;}
+.btn-p{
   display:inline-flex;align-items:center;gap:10px;
-  padding:14px 28px;
-  background:var(--accent);color:var(--bg);
-  font-family:'Syne',sans-serif;font-weight:700;
-  font-size:12px;letter-spacing:0.1em;text-transform:uppercase;
-  text-decoration:none;border-radius:2px;
-  transition:all 0.3s;
+  padding:14px 32px;background:var(--sky);
+  color:var(--ink);font-family:var(--font-body);font-weight:700;
+  font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+  text-decoration:none;border-radius:3px;
+  position:relative;overflow:hidden;transition:all .3s;
+}
+.btn-p::before{
+  content:'';position:absolute;inset:0;
+  background:var(--teal);transform:translateX(-100%);transition:transform .3s;
+}
+.btn-p:hover::before{transform:translateX(0);}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(56,189,248,.3);}
+.btn-p span{position:relative;z-index:1;}
+.btn-s{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 32px;border:1px solid var(--border2);
+  color:var(--text);font-family:var(--font-body);font-weight:600;
+  font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+  text-decoration:none;border-radius:3px;
+  background:transparent;transition:all .3s;
+}
+.btn-s:hover{border-color:var(--sky);color:var(--sky);background:rgba(56,189,248,.05);transform:translateY(-2px);}
+
+/* hero right — data viz card */
+.hero-right{
+  display:flex;flex-direction:column;gap:20px;
+}
+@media(max-width:900px){.hero-right{order:-1;}}
+
+.hero-card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:28px;
   position:relative;overflow:hidden;
 }
-.btn-primary::before{
-  content:'';position:absolute;inset:0;
-  background:var(--accent2);
-  transform:translateX(-100%);transition:transform 0.3s;
+.hero-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--sky),transparent);
 }
-.btn-primary:hover::before{transform:translateX(0);}
-.btn-primary span{position:relative;z-index:1;}
-
-.btn-secondary{
-  display:inline-flex;align-items:center;gap:10px;
-  padding:14px 28px;
-  border:1px solid var(--border);color:var(--text);
-  font-family:'Syne',sans-serif;font-weight:600;
-  font-size:12px;letter-spacing:0.1em;text-transform:uppercase;
-  text-decoration:none;border-radius:2px;
-  transition:all 0.3s;
-  background:transparent;
+.hero-card-label{
+  font-family:var(--font-code);font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--sky);margin-bottom:20px;
+  display:flex;align-items:center;gap:8px;
 }
-.btn-secondary:hover{border-color:var(--accent);color:var(--accent);background:rgba(99,179,237,0.05);}
+.hero-card-label::before{content:'◈';font-size:8px;}
 
-.hero-stats{
-  display:flex;gap:48px;margin-top:64px;
-  padding-top:40px;
+/* mini pipeline */
+.mini-pipe{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.pipe-step{
+  background:var(--panel2);border:1px solid var(--border);
+  border-radius:4px;padding:6px 10px;
+  font-family:var(--font-code);font-size:10px;color:var(--muted);
+  white-space:nowrap;transition:all .3s;
+}
+.pipe-step:hover,.pipe-step.active{
+  border-color:var(--sky);color:var(--sky);
+  background:rgba(56,189,248,.05);
+  box-shadow:0 0 12px rgba(56,189,248,.1);
+}
+.pipe-arr{color:var(--dim);font-size:12px;}
+
+/* stats row */
+.stats-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+  margin-top:32px;padding-top:28px;
   border-top:1px solid var(--border);
-  flex-wrap:wrap;
 }
-.stat-item{}
-.stat-num{
-  font-family:'Syne',sans-serif;font-weight:800;
-  font-size:36px;color:var(--text);letter-spacing:-1px;
-  display:flex;align-items:baseline;gap:2px;
+@media(max-width:560px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+.stat{text-align:center;}
+.stat-n{
+  font-family:var(--font-display);font-size:clamp(32px,5vw,52px);
+  letter-spacing:1px;color:var(--text);
+  display:flex;justify-content:center;align-items:baseline;gap:2px;
 }
-.stat-num .unit{font-size:18px;color:var(--accent);}
-.stat-label{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.stat-n .u{font-size:.5em;color:var(--sky);}
+.stat-lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
 
-/* ─── PIPELINE VISUALIZER ─── */
-.pipeline-section{
-  padding:0 48px 80px;
+/* ═══════════════════════════════════════════════
+   PIPELINE VISUALIZER BAND
+═══════════════════════════════════════════════ */
+.pipe-band{
+  padding:0 clamp(20px,5vw,80px) 60px;
+  position:relative;z-index:1;
+}
+.pipe-band-inner{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:clamp(20px,4vw,40px);
+  overflow-x:auto;
+}
+.pipe-band-inner::-webkit-scrollbar{height:3px;}
+.pipe-band-inner::-webkit-scrollbar-thumb{background:var(--sky);}
+.pipe-band-title{
+  font-family:var(--font-code);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--sky);margin-bottom:24px;
+  display:flex;align-items:center;gap:8px;
+}
+.pipe-band-title::before{content:'⬡';font-size:10px;}
+.pipe-track{
+  display:flex;align-items:center;gap:0;min-width:max-content;padding:4px 0;
+}
+.pn{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.pn-box{
+  width:100px;height:62px;
+  background:var(--panel2);
+  border:1px solid var(--border);border-radius:6px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--font-code);font-size:10px;text-align:center;color:var(--text);
+  padding:8px;gap:4px;transition:all .3s;
+  position:relative;overflow:hidden;
+}
+.pn-box .pn-icon{font-size:16px;}
+.pn-box::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--sky),var(--teal));
+  transform:scaleX(0);transform-origin:left;transition:transform .4s;
+}
+.pn:hover .pn-box::after{transform:scaleX(1);}
+.pn:hover .pn-box{border-color:var(--sky);background:rgba(56,189,248,.06);}
+.pn-lbl{font-family:var(--font-code);font-size:9px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;}
+.pa{
+  width:48px;height:2px;flex-shrink:0;
+  background:linear-gradient(90deg,rgba(56,189,248,.15),rgba(56,189,248,.6),rgba(56,189,248,.15));
   position:relative;
 }
-.pipeline-track{
-  display:flex;align-items:center;gap:0;
-  overflow-x:auto;padding:32px 0;
-  scrollbar-width:none;
-}
-.pipeline-track::-webkit-scrollbar{display:none;}
-.p-node{
-  display:flex;flex-direction:column;align-items:center;
-  gap:8px;flex-shrink:0;
-}
-.p-node-box{
-  width:90px;height:56px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:4px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:10px;letter-spacing:0.05em;text-align:center;
-  color:var(--text);padding:8px;
-  transition:all 0.3s;
-  position:relative;overflow:hidden;
-}
-.p-node-box::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--accent);
-  transform:scaleX(0);transform-origin:left;
-  transition:transform 0.4s;
-}
-.p-node:hover .p-node-box::before{transform:scaleX(1);}
-.p-node:hover .p-node-box{border-color:var(--accent);background:rgba(99,179,237,0.08);}
-.p-node-label{font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;}
-.p-arrow{
-  width:40px;height:2px;background:linear-gradient(90deg,var(--border),var(--accent),var(--border));
-  flex-shrink:0;position:relative;
-}
-.p-arrow::after{
+.pa::after{
   content:'';position:absolute;right:-5px;top:-4px;
-  border-left:6px solid var(--accent);
+  border-left:7px solid rgba(56,189,248,.6);
   border-top:5px solid transparent;
   border-bottom:5px solid transparent;
 }
-.p-arrow.animated{
-  background:linear-gradient(90deg,var(--border),var(--accent),var(--border));
-  background-size:200% 100%;
-  animation:flow 2s linear infinite;
-}
-@keyframes flow{
-  0%{background-position:100% 0;}
-  100%{background-position:-100% 0;}
-}
 
-/* ─── SECTION LAYOUT ─── */
-section{padding:100px 48px;position:relative;}
-.section-header{margin-bottom:64px;}
-.section-label{
-  font-size:10px;letter-spacing:0.25em;text-transform:uppercase;
-  color:var(--accent);margin-bottom:16px;
-  display:flex;align-items:center;gap:12px;
+/* ═══════════════════════════════════════════════
+   ABOUT
+═══════════════════════════════════════════════ */
+#about{background:var(--ink2);}
+.about-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:clamp(40px,6vw,80px);align-items:start;
+  max-width:1300px;margin:0 auto;
 }
-.section-label::before{content:'';display:block;width:24px;height:1px;background:var(--accent);}
-.section-title{
-  font-family:'Syne',sans-serif;font-weight:800;
-  font-size:clamp(32px,5vw,56px);
-  letter-spacing:-2px;line-height:1;
-  color:var(--text);
-}
-.section-title em{
-  font-style:italic;font-family:'Instrument Serif',serif;
-  color:transparent;-webkit-text-stroke:1px rgba(226,232,240,0.3);
-}
-
-/* ─── EXPERIENCE ─── */
-#experience{background:var(--bg);}
-.exp-layout{display:grid;grid-template-columns:200px 1fr;gap:48px;}
-.exp-timeline{position:relative;}
-.exp-timeline::before{
-  content:'';position:absolute;left:0;top:24px;bottom:0;
-  width:1px;background:linear-gradient(to bottom,var(--accent),transparent);
-}
-.exp-dot{
-  width:10px;height:10px;background:var(--accent);
-  border-radius:50%;margin-left:-4.5px;margin-bottom:12px;
-  box-shadow:0 0 12px var(--accent);
-}
-.exp-date{font-size:11px;color:var(--muted);letter-spacing:0.05em;}
-.exp-company{
-  font-family:'Syne',sans-serif;font-weight:700;font-size:13px;
-  color:var(--accent2);margin-top:8px;
-}
-.exp-location{font-size:10px;color:var(--dim);margin-top:4px;}
-
-.exp-content{}
-.exp-role{
-  font-family:'Syne',sans-serif;font-weight:800;
-  font-size:28px;letter-spacing:-1px;
-  color:var(--text);margin-bottom:32px;
-}
-
-.exp-project{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:8px;
-  padding:28px;
+@media(max-width:768px){.about-grid{grid-template-columns:1fr;}}
+.about-text p{
+  font-size:15px;color:var(--muted);line-height:1.9;
   margin-bottom:20px;
-  position:relative;
-  overflow:hidden;
-  transition:all 0.3s;
 }
-.exp-project::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:linear-gradient(to bottom,var(--accent),var(--accent2));
-}
-.exp-project:hover{
-  border-color:rgba(99,179,237,0.25);
-  background:var(--surface2);
-  transform:translateX(4px);
-}
-.exp-project-title{
-  font-family:'Syne',sans-serif;font-weight:700;font-size:14px;
-  color:var(--text);margin-bottom:16px;
-  display:flex;align-items:center;gap:10px;
-}
-.exp-project-title .badge{
-  font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
-  background:rgba(99,179,237,0.1);border:1px solid rgba(99,179,237,0.2);
-  color:var(--accent);padding:2px 8px;border-radius:2px;
-}
-.exp-bullets{list-style:none;display:flex;flex-direction:column;gap:8px;}
-.exp-bullets li{
-  font-size:13px;color:var(--muted);padding-left:20px;position:relative;line-height:1.6;
-}
-.exp-bullets li::before{
-  content:'→';position:absolute;left:0;color:var(--accent);font-size:11px;top:1px;
-}
+.about-text p strong{color:var(--sky);}
+.about-text p em{color:var(--teal);font-style:normal;}
 
-/* ─── PROJECTS ─── */
-#projects{background:var(--bg2);}
-.projects-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-  gap:2px;
+.about-right{}
+.about-edu{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;padding:28px;margin-bottom:20px;
 }
-.project-card{
-  background:var(--surface);
-  padding:40px;
-  position:relative;overflow:hidden;
-  transition:all 0.4s;
-  border:1px solid transparent;
+.about-edu-title{
+  font-family:var(--font-display);font-size:18px;letter-spacing:1px;
+  color:var(--text);margin-bottom:4px;
 }
-.project-card::before{
-  content:'';position:absolute;
-  top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--accent),transparent);
-  transform:scaleX(0);transition:transform 0.4s;
+.about-edu-school{font-family:var(--font-code);font-size:11px;color:var(--sky);margin-bottom:2px;}
+.about-edu-year{font-size:11px;color:var(--dim);}
+.cert-card{
+  background:linear-gradient(135deg,rgba(251,191,36,.06),rgba(56,189,248,.04));
+  border:1px solid rgba(251,191,36,.2);
+  border-radius:10px;padding:24px;
+  display:flex;align-items:center;gap:16px;
 }
-.project-card:hover::before{transform:scaleX(1);}
-.project-card:hover{
-  background:var(--surface2);
-  border-color:var(--border);
-}
-.project-num{
-  font-family:'Syne',sans-serif;font-weight:800;
-  font-size:56px;letter-spacing:-3px;
-  color:rgba(99,179,237,0.06);
-  position:absolute;top:20px;right:24px;
-  line-height:1;
-  transition:color 0.3s;
-}
-.project-card:hover .project-num{color:rgba(99,179,237,0.1);}
-.project-icon{
-  width:44px;height:44px;
-  background:rgba(99,179,237,0.08);
-  border:1px solid var(--border);
-  border-radius:8px;
+.cert-icon{
+  width:48px;height:48px;border-radius:8px;
+  background:rgba(251,191,36,.1);
   display:flex;align-items:center;justify-content:center;
-  font-size:20px;margin-bottom:24px;
+  font-size:22px;flex-shrink:0;
 }
-.project-name{
-  font-family:'Syne',sans-serif;font-weight:700;
-  font-size:18px;letter-spacing:-0.5px;
-  color:var(--text);margin-bottom:12px;line-height:1.2;
-}
-.project-desc{
-  font-size:12px;color:var(--muted);line-height:1.7;
-  margin-bottom:24px;
-}
-.project-highlights{
-  list-style:none;display:flex;flex-direction:column;gap:6px;
-  margin-bottom:24px;
-}
-.project-highlights li{
-  font-size:11px;color:var(--muted);
-  display:flex;align-items:flex-start;gap:8px;
-  padding:6px 10px;
-  background:rgba(99,179,237,0.03);
-  border-left:2px solid rgba(99,179,237,0.15);
-}
-.project-highlights li::before{content:'◆';font-size:6px;color:var(--accent);flex-shrink:0;margin-top:4px;}
-.project-tags{display:flex;flex-wrap:wrap;gap:6px;}
-.tag{
-  font-size:10px;letter-spacing:0.05em;
-  color:var(--dim);border:1px solid rgba(255,255,255,0.06);
-  padding:3px 10px;border-radius:2px;
-  background:rgba(255,255,255,0.02);
-  transition:all 0.2s;
-}
-.project-card:hover .tag{border-color:var(--border);color:var(--muted);}
+.cert-name{font-family:var(--font-body);font-weight:600;font-size:14px;color:var(--text);}
+.cert-sub{font-family:var(--font-code);font-size:11px;color:var(--amber);margin-top:3px;}
 
-/* ─── SKILLS ─── */
-#skills{background:var(--bg);}
-.skills-layout{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+/* ═══════════════════════════════════════════════
+   EXPERIENCE
+═══════════════════════════════════════════════ */
+#experience{background:var(--ink);}
+.exp-wrap{max-width:1100px;margin:0 auto;}
+.exp-header-row{
+  display:grid;grid-template-columns:220px 1fr;
+  gap:clamp(24px,4vw,60px);align-items:start;
+}
+@media(max-width:768px){.exp-header-row{grid-template-columns:1fr;}}
+.exp-meta{position:sticky;top:90px;}
+.exp-company-logo{
+  width:56px;height:56px;background:var(--panel);
+  border:1px solid var(--border);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:22px;letter-spacing:1px;
+  color:var(--sky);margin-bottom:16px;
+}
+.exp-company-name{
+  font-family:var(--font-display);font-size:22px;letter-spacing:1px;
+  color:var(--teal);margin-bottom:4px;
+}
+.exp-date{font-family:var(--font-code);font-size:11px;color:var(--muted);}
+.exp-loc{font-family:var(--font-code);font-size:10px;color:var(--dim);margin-top:4px;}
+.exp-role-title{
+  font-family:var(--font-display);
+  font-size:clamp(32px,5vw,52px);
+  letter-spacing:2px;color:var(--text);
+  margin-bottom:36px;line-height:.95;
+}
+
+.exp-proj{
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  padding:clamp(20px,3vw,32px);margin-bottom:20px;
+  position:relative;overflow:hidden;transition:all .3s;
+}
+.exp-proj::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(to bottom,var(--sky),var(--teal));
+}
+.exp-proj:hover{
+  border-color:rgba(56,189,248,.25);background:var(--panel2);
+  transform:translateX(6px);
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+.proj-h{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:12px;margin-bottom:20px;flex-wrap:wrap;
+}
+.proj-name{
+  font-family:var(--font-body);font-weight:700;font-size:16px;color:var(--text);
+}
+.proj-badge{
+  font-family:var(--font-code);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);
+  color:var(--sky);padding:3px 10px;border-radius:3px;flex-shrink:0;
+}
+.exp-ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.exp-ul li{
+  font-size:14px;color:var(--muted);padding-left:22px;position:relative;line-height:1.6;
+}
+.exp-ul li::before{
+  content:'→';position:absolute;left:0;color:var(--sky);font-size:12px;top:2px;
+}
+.exp-ul li strong{color:var(--text);}
+
+/* ═══════════════════════════════════════════════
+   PROJECTS
+═══════════════════════════════════════════════ */
+#projects{background:var(--ink2);}
+.proj-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+  gap:2px;
+  max-width:1300px;margin:0 auto;
+}
+.pc{
+  background:var(--panel);
+  padding:clamp(28px,4vw,44px);
+  position:relative;overflow:hidden;
+  transition:all .4s;border:1px solid transparent;
+}
+.pc:hover{background:var(--panel2);border-color:var(--border);}
+.pc-glow{
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--sky),transparent);
+  transform:scaleX(0);transition:transform .4s;
+}
+.pc:hover .pc-glow{transform:scaleX(1);}
+.pc-num{
+  font-family:var(--font-display);font-size:72px;letter-spacing:-2px;
+  color:rgba(56,189,248,.05);
+  position:absolute;top:16px;right:20px;line-height:1;
+  transition:color .3s;
+}
+.pc:hover .pc-num{color:rgba(56,189,248,.09);}
+.pc-icon{
+  width:48px;height:48px;background:rgba(56,189,248,.07);
+  border:1px solid var(--border);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;margin-bottom:24px;
+}
+.pc-name{
+  font-family:var(--font-body);font-weight:700;font-size:18px;
+  color:var(--text);margin-bottom:12px;line-height:1.3;
+}
+.pc-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:24px;}
+.pc-kpis{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;}
+.pc-kpis li{
+  font-size:12px;color:var(--muted);
+  display:flex;align-items:flex-start;gap:10px;
+  padding:8px 12px;
+  background:rgba(56,189,248,.03);
+  border-left:2px solid rgba(56,189,248,.18);
+  line-height:1.5;
+}
+.pc-kpis li::before{content:'◆';font-size:7px;color:var(--sky);flex-shrink:0;margin-top:4px;}
+.pc-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{
+  font-family:var(--font-code);font-size:10px;color:var(--dim);
+  border:1px solid rgba(255,255,255,.06);padding:4px 10px;border-radius:3px;
+  background:rgba(255,255,255,.02);transition:all .2s;
+}
+.pc:hover .tag{border-color:var(--border);color:var(--muted);}
+
+/* ═══════════════════════════════════════════════
+   SKILLS
+═══════════════════════════════════════════════ */
+#skills{background:var(--ink);}
+.skills-wrap{max-width:1300px;margin:0 auto;}
+.skills-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
   gap:2px;
 }
-.skill-group{
-  background:var(--surface);
-  padding:32px;
-  position:relative;overflow:hidden;
-  transition:all 0.3s;
+.sg{
+  background:var(--panel);padding:clamp(24px,3vw,36px);
+  position:relative;overflow:hidden;transition:all .3s;
 }
-.skill-group::after{
-  content:'';position:absolute;
-  bottom:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  transform:scaleX(0);transform-origin:left;
-  transition:transform 0.4s;
+.sg::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--sky),var(--teal));
+  transform:scaleX(0);transform-origin:left;transition:transform .4s;
 }
-.skill-group:hover::after{transform:scaleX(1);}
-.skill-group:hover{background:var(--surface2);}
-.skill-group-icon{font-size:24px;margin-bottom:16px;}
-.skill-group-name{
-  font-family:'Syne',sans-serif;font-weight:700;font-size:13px;
-  letter-spacing:0.05em;color:var(--text);margin-bottom:20px;
-  text-transform:uppercase;
+.sg:hover::after{transform:scaleX(1);}
+.sg:hover{background:var(--panel2);}
+.sg-icon{font-size:26px;margin-bottom:16px;}
+.sg-name{
+  font-family:var(--font-body);font-weight:700;font-size:13px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--text);margin-bottom:20px;
 }
-.skill-pills{display:flex;flex-wrap:wrap;gap:8px;}
-.skill-pill{
-  font-size:11px;color:var(--muted);
-  border:1px solid var(--border);
-  padding:6px 12px;border-radius:2px;
-  background:rgba(99,179,237,0.03);
-  transition:all 0.2s;
+.pills{display:flex;flex-wrap:wrap;gap:8px;}
+.pill{
+  font-family:var(--font-code);font-size:11px;color:var(--muted);
+  border:1px solid var(--border);padding:5px 12px;border-radius:3px;
+  background:rgba(56,189,248,.02);transition:all .2s;
 }
-.skill-pill.highlight{
-  color:var(--accent);border-color:rgba(99,179,237,0.3);
-  background:rgba(99,179,237,0.06);
+.pill.hi{
+  color:var(--sky);border-color:rgba(56,189,248,.3);
+  background:rgba(56,189,248,.05);
 }
-.skill-pill:hover{
-  color:var(--text);border-color:var(--accent);
-  background:rgba(99,179,237,0.1);
-}
+.pill:hover{color:var(--text);border-color:var(--sky);background:rgba(56,189,248,.08);}
 
-/* ─── CERT ─── */
-.cert-bar{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:4px;
-  padding:20px 28px;
-  display:inline-flex;align-items:center;gap:16px;
-  margin-top:48px;
+/* tools row */
+.tools-row{
+  display:flex;flex-wrap:wrap;gap:12px;margin-top:48px;padding-top:32px;
+  border-top:1px solid var(--border);
 }
-.cert-logo{
-  width:36px;height:36px;
-  background:rgba(99,179,237,0.1);
-  border-radius:4px;display:flex;align-items:center;justify-content:center;
-  font-size:16px;
+.tool-badge{
+  display:flex;align-items:center;gap:8px;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:6px;padding:10px 16px;
+  font-family:var(--font-code);font-size:11px;color:var(--muted);
+  transition:all .2s;
 }
-.cert-info{}
-.cert-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--text);}
-.cert-issuer{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:0.05em;}
+.tool-badge:hover{border-color:var(--sky);color:var(--text);}
+.tool-badge .ti{font-size:14px;}
 
-/* ─── CONTACT ─── */
+/* ═══════════════════════════════════════════════
+   CONTACT
+═══════════════════════════════════════════════ */
 #contact{
-  background:var(--bg2);
-  text-align:center;
+  background:var(--ink2);text-align:center;
+  padding-bottom:0;
 }
 .contact-heading{
-  font-family:'Syne',sans-serif;font-weight:800;
-  font-size:clamp(40px,7vw,80px);
-  letter-spacing:-3px;line-height:0.95;
+  font-family:var(--font-display);
+  font-size:clamp(52px,10vw,120px);
+  letter-spacing:3px;line-height:.92;
   margin-bottom:32px;
 }
-.contact-heading .accent{color:var(--accent);}
-.contact-heading .dim{color:transparent;-webkit-text-stroke:1px rgba(226,232,240,0.15);}
+.contact-heading .l1{color:var(--sky);}
+.contact-heading .l2{color:transparent;-webkit-text-stroke:1px rgba(226,232,240,.15);}
+.contact-heading .l3{color:var(--text);}
 .contact-sub{
-  font-size:14px;color:var(--muted);max-width:480px;
-  margin:0 auto 48px;line-height:1.8;
+  font-size:15px;color:var(--muted);max-width:480px;
+  margin:0 auto 52px;line-height:1.8;
 }
-.contact-links{
-  display:flex;justify-content:center;flex-wrap:wrap;gap:16px;
+.clinks{
+  display:flex;justify-content:center;flex-wrap:wrap;gap:14px;
   margin-bottom:80px;
 }
-.contact-link{
+.clink{
   display:flex;align-items:center;gap:10px;
-  padding:14px 24px;
-  border:1px solid var(--border);
-  color:var(--muted);text-decoration:none;
-  font-size:12px;letter-spacing:0.05em;
-  border-radius:2px;
-  transition:all 0.3s;
+  padding:14px 24px;border:1px solid var(--border);
+  color:var(--muted);text-decoration:none;font-size:13px;
+  border-radius:4px;transition:all .3s;font-family:var(--font-body);
 }
-.contact-link:hover{
-  border-color:var(--accent);color:var(--text);
-  background:rgba(99,179,237,0.05);
-}
-.contact-link svg{width:16px;height:16px;flex-shrink:0;}
+.clink:hover{border-color:var(--sky);color:var(--text);background:rgba(56,189,248,.04);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.2);}
+.clink svg{width:16px;height:16px;flex-shrink:0;}
 
 footer{
   border-top:1px solid var(--border);
-  padding:24px 48px;
-  display:flex;justify-content:space-between;align-items:center;
-  flex-wrap:wrap;gap:12px;
+  padding:24px clamp(20px,5vw,64px);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
 }
-.footer-left{font-size:11px;color:var(--dim);}
-.footer-right{
-  font-size:10px;color:var(--dim);letter-spacing:0.1em;text-transform:uppercase;
+.footer-l{font-family:var(--font-code);font-size:11px;color:var(--dim);}
+.footer-r{font-family:var(--font-code);font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;}
+
+/* ═══════════════════════════════════════════════
+   DIVIDER
+═══════════════════════════════════════════════ */
+.div{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 clamp(20px,5vw,80px);}
+
+/* ═══════════════════════════════════════════════
+   FLOATING LINES ACCENT (decorative)
+═══════════════════════════════════════════════ */
+.fl{
+  position:absolute;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(56,189,248,.12),transparent);
+  height:1px;width:100%;
 }
 
-/* ─── DIVIDER ─── */
-.divider{
-  height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);
-  margin:0 48px;
-}
-
-/* ─── ANIMATIONS ─── */
-.reveal{
-  opacity:0;transform:translateY(30px);
-  transition:opacity 0.7s ease,transform 0.7s ease;
-}
-.reveal.visible{opacity:1;transform:translateY(0);}
-
-/* ─── MOBILE ─── */
-@media(max-width:768px){
-  nav{padding:16px 24px;}
-  .nav-links{display:none;}
-  #hero{padding:100px 24px 60px;}
-  .hero-stats{gap:32px;}
-  section{padding:64px 24px;}
-  .exp-layout{grid-template-columns:1fr;}
-  .exp-timeline{display:flex;align-items:center;gap:16px;margin-bottom:8px;}
-  .exp-timeline::before{display:none;}
-  footer{padding:20px 24px;}
-  .contact-links{flex-direction:column;align-items:center;}
-  .pipeline-section{padding:0 24px 48px;}
-}
-
-/* ─── TYPING CURSOR ─── */
-.typed::after{
-  content:'|';animation:blink 1s infinite;color:var(--accent);
-}
 </style>
 </head>
 <body>
 
-<div class="cursor" id="cursor"></div>
-<div class="cursor-ring" id="cursorRing"></div>
-<div class="grid-bg"></div>
+<div id="cur"></div>
+<div id="cur-r"></div>
+<div class="g-bg"></div>
 
-<!-- NAV -->
+<!-- ─── NAV ─── -->
 <nav>
-  <div class="nav-logo">AK<span>.</span></div>
+  <div class="nav-logo">AK<span class="dot">.</span></div>
   <ul class="nav-links">
+    <li><a href="#about">About</a></li>
     <li><a href="#experience">Experience</a></li>
     <li><a href="#projects">Projects</a></li>
     <li><a href="#skills">Skills</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
-  <div class="nav-badge">Open to roles</div>
+  <div class="nav-avail">Open to Roles</div>
+  <button class="nav-ham" id="ham" aria-label="menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
-<!-- HERO -->
-<section id="hero">
-  <div class="hero-glow"></div>
-  <svg class="hero-pipeline" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="20" y="60" width="80" height="40" rx="4" stroke="#63b3ed" stroke-width="1"/>
-    <rect x="160" y="60" width="80" height="40" rx="4" stroke="#4fd1c5" stroke-width="1"/>
-    <rect x="300" y="60" width="80" height="40" rx="4" stroke="#63b3ed" stroke-width="1"/>
-    <line x1="100" y1="80" x2="160" y2="80" stroke="#63b3ed" stroke-width="1" stroke-dasharray="4 3"/>
-    <line x1="240" y1="80" x2="300" y2="80" stroke="#4fd1c5" stroke-width="1" stroke-dasharray="4 3"/>
-    <rect x="90" y="180" width="80" height="40" rx="4" stroke="#f6ad55" stroke-width="1"/>
-    <rect x="230" y="180" width="80" height="40" rx="4" stroke="#63b3ed" stroke-width="1"/>
-    <line x1="200" y1="100" x2="130" y2="180" stroke="#63b3ed" stroke-width="1" stroke-dasharray="4 3"/>
-    <line x1="200" y1="100" x2="270" y2="180" stroke="#63b3ed" stroke-width="1" stroke-dasharray="4 3"/>
-    <rect x="160" y="300" width="80" height="40" rx="4" stroke="#4fd1c5" stroke-width="1"/>
-    <line x1="130" y1="220" x2="200" y2="300" stroke="#f6ad55" stroke-width="1" stroke-dasharray="4 3"/>
-    <line x1="270" y1="220" x2="200" y2="300" stroke="#63b3ed" stroke-width="1" stroke-dasharray="4 3"/>
-    <circle cx="200" cy="80" r="5" fill="#63b3ed" opacity="0.6"/>
-    <circle cx="130" cy="200" r="5" fill="#f6ad55" opacity="0.6"/>
-    <circle cx="270" cy="200" r="5" fill="#63b3ed" opacity="0.6"/>
-    <circle cx="200" cy="320" r="5" fill="#4fd1c5" opacity="0.6"/>
-  </svg>
+<div class="mob-menu" id="mobmenu">
+  <a href="#about" class="mm-link">About</a>
+  <a href="#experience" class="mm-link">Experience</a>
+  <a href="#projects" class="mm-link">Projects</a>
+  <a href="#skills" class="mm-link">Skills</a>
+  <a href="#contact" class="mm-link">Contact</a>
+</div>
 
-  <div class="hero-content">
-    <div class="hero-eyebrow">Data Engineer · Bengaluru, India</div>
-    <h1 class="hero-name">
-      <div>Adith</div>
-      <div class="line2">Krishna</div>
-    </h1>
-    <p class="hero-title">
-      Building <strong>Azure pipelines</strong> that actually work at scale
-    </p>
-    <p class="hero-desc">
-      2 years turning high-volume, messy data into clean, reliable analytics — 
-      from raw ingestion through transformation to reporting layers.
-      ADF · Fabric · Synapse · PySpark · SQL.
-    </p>
-    <div class="hero-cta">
-      <a href="#projects" class="btn-primary"><span>View Projects</span> <span>↓</span></a>
-      <a href="mailto:adithkrishna59955@gmail.com" class="btn-secondary">Get in Touch</a>
+<!-- ─── HERO ─── -->
+<section id="hero">
+  <div class="hero-inner" style="padding:0 clamp(20px,5vw,80px);">
+    <div class="hero-left">
+      <div class="hero-tag rv">Data Engineer · Bengaluru, India</div>
+      <h1 class="hero-name rv">
+        <div class="ln1">ADITH</div>
+        <div class="ln2">KRISHNA</div>
+      </h1>
+      <p class="hero-role rv">
+        Building <strong>Azure data pipelines</strong> that scale,<br>
+        with precision, reliability, and zero drama.
+      </p>
+      <p class="hero-desc rv">
+        2+ years turning messy, high-volume data into clean analytics infrastructure.
+        Specialising in ADF, Microsoft Fabric, Synapse, PySpark, and the full Azure modern
+        data stack — from raw ingestion to Power BI dashboards.
+      </p>
+      <div class="hero-btns rv">
+        <a href="#projects" class="btn-p"><span>View Work</span><span>↓</span></a>
+        <a href="mailto:adithkrishna59955@gmail.com" class="btn-s">Get in Touch</a>
+      </div>
     </div>
-    <div class="hero-stats">
-      <div class="stat-item">
-        <div class="stat-num">2<span class="unit">yr</span></div>
-        <div class="stat-label">Experience</div>
+    <div class="hero-right rv-r">
+      <div class="hero-card">
+        <div class="hero-card-label">Live Pipeline Topology</div>
+        <div class="mini-pipe">
+          <div class="pipe-step active">Raw Sources</div>
+          <span class="pipe-arr">→</span>
+          <div class="pipe-step">ADF</div>
+          <span class="pipe-arr">→</span>
+          <div class="pipe-step">ADLS Gen2</div>
+          <span class="pipe-arr">→</span>
+          <div class="pipe-step">PySpark</div>
+          <span class="pipe-arr">→</span>
+          <div class="pipe-step">Synapse</div>
+          <span class="pipe-arr">→</span>
+          <div class="pipe-step">Power BI</div>
+        </div>
+        <div style="font-family:var(--font-code);font-size:10px;color:var(--dim);margin-top:12px;">
+          ● Medallion Architecture — Bronze → Silver → Gold
+        </div>
       </div>
-      <div class="stat-item">
-        <div class="stat-num">15<span class="unit">+</span></div>
-        <div class="stat-label">Pipelines Delivered</div>
+      <div class="hero-card">
+        <div class="hero-card-label">Impact Snapshot</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:14px;">
+            <div style="font-family:var(--font-display);font-size:32px;letter-spacing:1px;color:var(--sky);">30%</div>
+            <div style="font-family:var(--font-code);font-size:10px;color:var(--muted);margin-top:4px;">Spark job speedup via query optimisation</div>
+          </div>
+          <div style="background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:14px;">
+            <div style="font-family:var(--font-display);font-size:32px;letter-spacing:1px;color:var(--teal);">50%</div>
+            <div style="font-family:var(--font-code);font-size:10px;color:var(--muted);margin-top:4px;">Query latency drop on Gold layer</div>
+          </div>
+          <div style="background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:14px;">
+            <div style="font-family:var(--font-display);font-size:32px;letter-spacing:1px;color:var(--amber);">60%</div>
+            <div style="font-family:var(--font-code);font-size:10px;color:var(--muted);margin-top:4px;">Fewer data-quality incidents downstream</div>
+          </div>
+          <div style="background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:14px;">
+            <div style="font-family:var(--font-display);font-size:32px;letter-spacing:1px;color:var(--sky);">~45m</div>
+            <div style="font-family:var(--font-code);font-size:10px;color:var(--muted);margin-top:4px;">Batch time (was 6hrs) after migration</div>
+          </div>
+        </div>
       </div>
-      <div class="stat-item">
-        <div class="stat-num">5<span class="unit">×</span></div>
-        <div class="stat-label">Azure Services</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">30<span class="unit">%</span></div>
-        <div class="stat-label">Perf Gains</div>
-      </div>
+    </div>
+  </div>
+  <div class="stats-row rv" style="padding:0 clamp(20px,5vw,80px);max-width:1400px;margin:48px auto 0;border-top:1px solid var(--border);padding-top:40px;">
+    <div class="stat">
+      <div class="stat-n"><span class="cnt" data-to="2">0</span><span class="u">yr</span></div>
+      <div class="stat-lbl">Experience</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n"><span class="cnt" data-to="15">0</span><span class="u">+</span></div>
+      <div class="stat-lbl">Pipelines Delivered</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n"><span class="cnt" data-to="5">0</span><span class="u">×</span></div>
+      <div class="stat-lbl">Azure Services</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n"><span class="cnt" data-to="3">0</span><span class="u">+</span></div>
+      <div class="stat-lbl">Projects Shipped</div>
     </div>
   </div>
 </section>
 
-<!-- PIPELINE TRACK -->
-<div class="pipeline-section reveal">
-  <div class="pipeline-track">
-    <div class="p-node">
-      <div class="p-node-box">Raw Sources</div>
-      <div class="p-node-label">Ingestion</div>
-    </div>
-    <div class="p-arrow animated"></div>
-    <div class="p-node">
-      <div class="p-node-box">ADF Pipelines</div>
-      <div class="p-node-label">Orchestration</div>
-    </div>
-    <div class="p-arrow animated"></div>
-    <div class="p-node">
-      <div class="p-node-box">ADLS Gen2</div>
-      <div class="p-node-label">Bronze Layer</div>
-    </div>
-    <div class="p-arrow animated"></div>
-    <div class="p-node">
-      <div class="p-node-box">PySpark / Fabric</div>
-      <div class="p-node-label">Silver Layer</div>
-    </div>
-    <div class="p-arrow animated"></div>
-    <div class="p-node">
-      <div class="p-node-box">Synapse SQL</div>
-      <div class="p-node-label">Gold Layer</div>
-    </div>
-    <div class="p-arrow animated"></div>
-    <div class="p-node">
-      <div class="p-node-box">Power BI</div>
-      <div class="p-node-label">Reporting</div>
+<!-- ─── PIPELINE BAND ─── -->
+<div class="pipe-band rv">
+  <div class="pipe-band-inner">
+    <div class="pipe-band-title">End-to-End Data Architecture Stack</div>
+    <div class="pipe-track">
+      <div class="pn">
+        <div class="pn-box"><div class="pn-icon">📥</div><div>Raw Sources</div></div>
+        <div class="pn-lbl">Ingestion</div>
+      </div>
+      <div class="pa"></div>
+      <div class="pn">
+        <div class="pn-box"><div class="pn-icon">🏭</div><div>ADF Pipelines</div></div>
+        <div class="pn-lbl">Orchestration</div>
+      </div>
+      <div class="pa"></div>
+      <div class="pn">
+        <div class="pn-box"><div class="pn-icon">🏔️</div><div>ADLS Gen2</div></div>
+        <div class="pn-lbl">Bronze Layer</div>
+      </div>
+      <div class="pa"></div>
+      <div class="pn">
+        <div class="pn-box"><div class="pn-icon">⚡</div><div>PySpark / Fabric</div></div>
+        <div class="pn-lbl">Silver Layer</div>
+      </div>
+      <div class="pa"></div>
+      <div class="pn">
+        <div class="pn-box"><div class="pn-icon">🗄️</div><div>Synapse SQL</div></div>
+        <div class="pn-lbl">Gold Layer</div>
+      </div>
+      <div class="pa"></div>
+      <div class="pn">
+        <div class="pn-box"><div class="pn-icon">🔍</div><div>Data Quality</div></div>
+        <div class="pn-lbl">Observability</div>
+      </div>
+      <div class="pa"></div>
+      <div class="pn">
+        <div class="pn-box"><div class="pn-icon">📊</div><div>Power BI</div></div>
+        <div class="pn-lbl">Reporting</div>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="divider"></div>
+<div class="div"></div>
 
-<!-- EXPERIENCE -->
-<section id="experience">
-  <div class="section-header reveal">
-    <div class="section-label">01 / Work</div>
-    <h2 class="section-title">Experience</h2>
-  </div>
-  <div class="exp-layout">
-    <div class="exp-timeline reveal">
-      <div class="exp-dot"></div>
-      <div class="exp-date">May 2024 — Present</div>
-      <div class="exp-company">LTIMindtree</div>
-      <div class="exp-location">Bengaluru, India</div>
+<!-- ─── ABOUT ─── -->
+<section id="about">
+  <div class="sec-label rv">00 / Who</div>
+  <h2 class="sec-title rv">About <span>Me</span></h2>
+  <div class="about-grid">
+    <div class="about-text rv-l">
+      <p>
+        I'm a <strong>Data Engineer at LTIMindtree</strong>, Bengaluru, where I design and
+        build cloud-native data infrastructure on the Azure ecosystem — primarily for the
+        <em>Microsoft Learn platform analytics workload</em>.
+      </p>
+      <p>
+        My day-to-day involves translating complex, high-volume raw data flows into clean,
+        reliable pipelines that business stakeholders can actually trust. That means ADF
+        orchestration, PySpark transformations, Medallion Architecture on Microsoft Fabric,
+        and Synapse Analytics SQL pools.
+      </p>
+      <p>
+        I care deeply about <strong>pipeline resilience</strong> — incremental loads,
+        watermarking, trigger-based scheduling, SLA monitoring, and automated data-quality
+        checks baked in from the start, not bolted on at the end.
+      </p>
+      <p>
+        Before that, I trained through the <em>Great Learning Academy Software Development
+        Program</em> and completed a B.Tech in Computer Science at <strong>VIT Chennai</strong>.
+        I hold a <strong>Microsoft AZ-900</strong> certification and am continuously expanding
+        deeper into the Azure data engineering certifications track.
+      </p>
+      <p>
+        Outside work: I enjoy reading about distributed systems, experimenting with Delta Lake,
+        and contributing to internal knowledge-sharing sessions at my team.
+      </p>
     </div>
-    <div class="exp-content">
-      <div class="exp-role reveal">Data Engineer</div>
-
-      <div class="exp-project reveal">
-        <div class="exp-project-title">
-          Microsoft Learn Platform Analytics
-          <span class="badge">Microsoft Skilling Track</span>
-        </div>
-        <ul class="exp-bullets">
-          <li>Built end-to-end ETL pipelines using ADF, Microsoft Fabric, and Synapse Analytics to ingest and process large-scale learning activity data.</li>
-          <li>Developed PySpark transformation workflows for structured and semi-structured datasets; cut processing time by ~30% via Spark job and SQL optimisation.</li>
-          <li>Implemented incremental loads, trigger-based scheduling, and validation checkpoints; monitored pipeline health and resolved failures to meet SLA targets.</li>
-        </ul>
+    <div class="about-right rv-r">
+      <div class="about-edu">
+        <div class="about-edu-title">B.Tech Computer Science</div>
+        <div class="about-edu-school">Vellore Institute of Technology, Chennai</div>
+        <div class="about-edu-year">2019 – 2023</div>
       </div>
-
-      <div class="exp-project reveal">
-        <div class="exp-project-title">
-          Enterprise Data Integration
-          <span class="badge">Internal Platform</span>
+      <div class="about-edu">
+        <div class="about-edu-title">Software Development Program</div>
+        <div class="about-edu-school">Great Learning Academy</div>
+        <div class="about-edu-year">Sep 2023 – Jun 2024</div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-icon">🏆</div>
+        <div>
+          <div class="cert-name">Microsoft Certified: Azure Fundamentals</div>
+          <div class="cert-sub">AZ-900 · Microsoft</div>
         </div>
-        <ul class="exp-bullets">
-          <li>Developed scalable ingestion pipelines integrating multiple internal sources into ADLS Gen2; built reusable ADF templates reducing new source onboarding by ~40%.</li>
-          <li>Enforced schema standardisation and data quality rules across Parquet, CSV, and JSON datasets for analytics layer reliability.</li>
-        </ul>
       </div>
     </div>
   </div>
 </section>
 
-<div class="divider"></div>
+<div class="div"></div>
 
-<!-- PROJECTS -->
-<section id="projects">
-  <div class="section-header reveal">
-    <div class="section-label">02 / Work</div>
-    <h2 class="section-title">Projects</h2>
+<!-- ─── EXPERIENCE ─── -->
+<section id="experience">
+  <div class="sec-label rv">01 / Work</div>
+  <h2 class="sec-title rv">Experience</h2>
+  <div class="exp-wrap">
+    <div class="exp-header-row">
+      <div class="exp-meta rv-l">
+        <div class="exp-company-logo">LTI</div>
+        <div class="exp-company-name">LTIMindtree</div>
+        <div class="exp-date">May 2024 — Present</div>
+        <div class="exp-loc">📍 Bengaluru, India</div>
+      </div>
+      <div class="rv-r">
+        <div class="exp-role-title">DATA<br>ENGINEER</div>
+
+        <div class="exp-proj rv">
+          <div class="proj-h">
+            <div class="proj-name">Microsoft Learn Platform Analytics</div>
+            <div class="proj-badge">Microsoft Skilling Track</div>
+          </div>
+          <ul class="exp-ul">
+            <li>Designed and maintained <strong>end-to-end ETL pipelines</strong> using ADF, Microsoft Fabric, and Synapse Analytics to ingest and process large-scale learning activity data — millions of events daily from the Microsoft Learn platform.</li>
+            <li>Built <strong>PySpark transformation workflows</strong> for structured and semi-structured datasets; optimised Spark jobs and SQL queries, cutting processing time by <strong>~30%</strong> through partition pruning, broadcast joins, and predicate pushdown.</li>
+            <li>Implemented <strong>incremental loads, trigger-based scheduling, and validation checkpoints</strong>; monitored pipeline health with Azure Monitor alerts and resolved failures proactively to meet SLA targets.</li>
+            <li>Collaborated directly with Microsoft client teams to define schema contracts, data models, and reporting requirements — translating business requirements into reliable data products.</li>
+          </ul>
+        </div>
+
+        <div class="exp-proj rv">
+          <div class="proj-h">
+            <div class="proj-name">Enterprise Data Integration</div>
+            <div class="proj-badge">Internal Platform</div>
+          </div>
+          <ul class="exp-ul">
+            <li>Developed <strong>scalable ingestion pipelines</strong> integrating multiple internal data sources into ADLS Gen2 using reusable ADF templates — reducing new-source onboarding effort by <strong>~40%</strong> per source.</li>
+            <li>Enforced <strong>data quality rules and schema standardisation</strong> across Parquet, CSV, and JSON datasets with PySpark-based validation hooks, ensuring analytics layer reliability for downstream consumers.</li>
+            <li>Built <strong>CI/CD pipelines in Azure DevOps</strong> for ADF deployments across Dev, UAT, and Prod environments — enabling parameterised, safe releases with automated testing and rollback gates.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="projects-grid">
+</section>
 
-    <div class="project-card reveal">
-      <div class="project-num">01</div>
-      <div class="project-icon">🏗️</div>
-      <div class="project-name">Real-Time Learning Analytics Platform</div>
-      <div class="project-desc">Medallion architecture on Microsoft Fabric Lakehouses — Bronze to Gold — with ADF event-trigger ingestion, PySpark Silver-layer cleansing, and Synapse Gold reporting tables.</div>
-      <ul class="project-highlights">
-        <li>Cut reporting query latency by ~50% with optimised Gold-layer tables</li>
-        <li>Power BI dashboards consumed by 5+ stakeholder teams</li>
-        <li>Row-level security across regions on the semantic model</li>
+<div class="div"></div>
+
+<!-- ─── PROJECTS ─── -->
+<section id="projects">
+  <div class="sec-label rv">02 / Build</div>
+  <h2 class="sec-title rv">Projects</h2>
+  <div class="proj-grid">
+
+    <div class="pc rv">
+      <div class="pc-glow"></div>
+      <div class="pc-num">01</div>
+      <div class="pc-icon">🏗️</div>
+      <div class="pc-name">Real-Time Learning Analytics Platform</div>
+      <div class="pc-desc">Full Medallion Architecture on Microsoft Fabric Lakehouses — Bronze ingestion to Gold reporting — with ADF event-trigger pipelines, PySpark Silver-layer cleansing, and Synapse dedicated SQL pool for Gold reporting tables powering live Power BI dashboards.</div>
+      <ul class="pc-kpis">
+        <li>Cut reporting query latency by <strong>~50%</strong> with partitioned and clustered Gold-layer tables</li>
+        <li>Power BI dashboards with row-level security served to <strong>5+ stakeholder teams</strong> across regions</li>
+        <li>Event-trigger ingestion handles clickstream bursts with zero manual intervention</li>
       </ul>
-      <div class="project-tags">
+      <div class="pc-tags">
         <span class="tag">ADF</span><span class="tag">Microsoft Fabric</span>
-        <span class="tag">PySpark</span><span class="tag">Synapse</span>
+        <span class="tag">PySpark</span><span class="tag">Synapse SQL</span>
         <span class="tag">Power BI</span><span class="tag">ADLS Gen2</span>
+        <span class="tag">Delta Lake</span>
       </div>
     </div>
 
-    <div class="project-card reveal">
-      <div class="project-num">02</div>
-      <div class="project-icon">🔍</div>
-      <div class="project-name">Data Quality & Observability Framework</div>
-      <div class="project-desc">Metadata-driven PySpark quality framework with schema checks, null validation, and referential integrity — integrated as modular ADF pipeline activities with automated alerting.</div>
-      <ul class="project-highlights">
-        <li>Reduced data-quality incidents escalated downstream by ~60%</li>
-        <li>JSON-based rule config in ADLS — no code changes for new rules</li>
-        <li>Azure Monitor alerts + audit table in Synapse SQL on every failure</li>
+    <div class="pc rv">
+      <div class="pc-glow"></div>
+      <div class="pc-num">02</div>
+      <div class="pc-icon">🔍</div>
+      <div class="pc-name">Data Quality & Observability Framework</div>
+      <div class="pc-desc">Metadata-driven PySpark quality framework covering schema validation, null checks, referential integrity, and range assertions — all configured via JSON rule files in ADLS, integrated as modular ADF pipeline activities with automated Azure Monitor alerting and a Synapse audit table.</div>
+      <ul class="pc-kpis">
+        <li>Reduced data-quality incidents escalated downstream by <strong>~60%</strong></li>
+        <li>Zero-code rule updates — new validation rules via JSON config with no pipeline redeployment</li>
+        <li>Full audit trail in Synapse SQL with every failure logged, timestamped, and alerted</li>
       </ul>
-      <div class="project-tags">
+      <div class="pc-tags">
         <span class="tag">PySpark</span><span class="tag">ADF</span>
-        <span class="tag">Azure Monitor</span><span class="tag">SQL</span>
-        <span class="tag">Python</span>
+        <span class="tag">Azure Monitor</span><span class="tag">Synapse SQL</span>
+        <span class="tag">Python</span><span class="tag">JSON Config</span>
       </div>
     </div>
 
-    <div class="project-card reveal">
-      <div class="project-num">03</div>
-      <div class="project-icon">☁️</div>
-      <div class="project-name">Incremental ETL Migration to Azure</div>
-      <div class="project-desc">Migrated 15+ legacy on-premises SQL Server batch jobs to cloud-native ADF incremental pipelines with full CI/CD across Dev / UAT / Prod environments.</div>
-      <ul class="project-highlights">
-        <li>Reduced daily batch time from ~6 hrs to ~45 min</li>
-        <li>Watermark & change-tracking incremental load patterns</li>
-        <li>Azure DevOps CI/CD with parameter overrides per environment</li>
+    <div class="pc rv">
+      <div class="pc-glow"></div>
+      <div class="pc-num">03</div>
+      <div class="pc-icon">☁️</div>
+      <div class="pc-name">Incremental ETL Migration — On-Prem to Azure</div>
+      <div class="pc-desc">Migrated 15+ legacy SQL Server batch jobs to cloud-native ADF incremental pipelines using watermark and change-tracking patterns, with full CI/CD across Dev/UAT/Prod in Azure DevOps. Eliminated overnight batch windows and dramatically reduced infrastructure costs.</div>
+      <ul class="pc-kpis">
+        <li>Batch processing time slashed from <strong>~6 hours to ~45 minutes</strong></li>
+        <li>Watermark & change-tracking incremental patterns for 15+ source tables</li>
+        <li>Azure DevOps CI/CD with parameter overrides, gate approvals per environment</li>
       </ul>
-      <div class="project-tags">
+      <div class="pc-tags">
         <span class="tag">ADF</span><span class="tag">ADLS Gen2</span>
         <span class="tag">Azure SQL</span><span class="tag">Azure DevOps</span>
-        <span class="tag">Parquet</span>
+        <span class="tag">Parquet</span><span class="tag">CI/CD</span>
       </div>
     </div>
 
   </div>
 </section>
 
-<div class="divider"></div>
+<div class="div"></div>
 
-<!-- SKILLS -->
+<!-- ─── SKILLS ─── -->
 <section id="skills">
-  <div class="section-header reveal">
-    <div class="section-label">03 / Stack</div>
-    <h2 class="section-title">Skills</h2>
-  </div>
-  <div class="skills-layout">
-    <div class="skill-group reveal">
-      <div class="skill-group-icon">☁️</div>
-      <div class="skill-group-name">Cloud — Azure</div>
-      <div class="skill-pills">
-        <span class="skill-pill highlight">Data Factory</span>
-        <span class="skill-pill highlight">Microsoft Fabric</span>
-        <span class="skill-pill highlight">Synapse Analytics</span>
-        <span class="skill-pill highlight">ADLS Gen2</span>
-        <span class="skill-pill">Azure Monitor</span>
-        <span class="skill-pill">Azure DevOps</span>
+  <div class="sec-label rv">03 / Stack</div>
+  <h2 class="sec-title rv">Skills</h2>
+  <div class="skills-wrap">
+    <div class="skills-grid">
+      <div class="sg rv">
+        <div class="sg-icon">☁️</div>
+        <div class="sg-name">Cloud — Azure</div>
+        <div class="pills">
+          <span class="pill hi">Data Factory</span>
+          <span class="pill hi">Microsoft Fabric</span>
+          <span class="pill hi">Synapse Analytics</span>
+          <span class="pill hi">ADLS Gen2</span>
+          <span class="pill">Azure Monitor</span>
+          <span class="pill">Azure DevOps</span>
+          <span class="pill">Azure SQL DB</span>
+        </div>
+      </div>
+      <div class="sg rv">
+        <div class="sg-icon">⚡</div>
+        <div class="sg-name">Languages & Big Data</div>
+        <div class="pills">
+          <span class="pill hi">PySpark</span>
+          <span class="pill hi">Python</span>
+          <span class="pill hi">SQL</span>
+          <span class="pill">Apache Spark</span>
+          <span class="pill">Spark Optimisation</span>
+          <span class="pill">Partition Tuning</span>
+        </div>
+      </div>
+      <div class="sg rv">
+        <div class="sg-icon">🗄️</div>
+        <div class="sg-name">Data Engineering</div>
+        <div class="pills">
+          <span class="pill hi">ETL / ELT</span>
+          <span class="pill hi">Medallion Architecture</span>
+          <span class="pill hi">Incremental Loading</span>
+          <span class="pill">Data Warehousing</span>
+          <span class="pill">Dimensional Modelling</span>
+          <span class="pill">Data Quality</span>
+          <span class="pill">Schema Evolution</span>
+        </div>
+      </div>
+      <div class="sg rv">
+        <div class="sg-icon">📦</div>
+        <div class="sg-name">Formats & Databases</div>
+        <div class="pills">
+          <span class="pill hi">Parquet</span>
+          <span class="pill hi">Delta Lake</span>
+          <span class="pill">JSON / CSV</span>
+          <span class="pill">SQL Server</span>
+          <span class="pill">Synapse SQL Pool</span>
+          <span class="pill">Azure SQL DB</span>
+        </div>
       </div>
     </div>
-    <div class="skill-group reveal">
-      <div class="skill-group-icon">⚡</div>
-      <div class="skill-group-name">Languages & Big Data</div>
-      <div class="skill-pills">
-        <span class="skill-pill highlight">PySpark</span>
-        <span class="skill-pill highlight">Python</span>
-        <span class="skill-pill highlight">SQL</span>
-        <span class="skill-pill">Apache Spark</span>
-        <span class="skill-pill">Spark Optimisation</span>
-      </div>
-    </div>
-    <div class="skill-group reveal">
-      <div class="skill-group-icon">🗄️</div>
-      <div class="skill-group-name">Data Engineering</div>
-      <div class="skill-pills">
-        <span class="skill-pill highlight">ETL / ELT</span>
-        <span class="skill-pill highlight">Medallion Architecture</span>
-        <span class="skill-pill">Incremental Loading</span>
-        <span class="skill-pill">Data Warehousing</span>
-        <span class="skill-pill">Dimensional Modeling</span>
-        <span class="skill-pill">Data Quality</span>
-      </div>
-    </div>
-    <div class="skill-group reveal">
-      <div class="skill-group-icon">📦</div>
-      <div class="skill-group-name">Formats & Databases</div>
-      <div class="skill-pills">
-        <span class="skill-pill highlight">Parquet</span>
-        <span class="skill-pill">Delta Lake</span>
-        <span class="skill-pill">JSON / CSV</span>
-        <span class="skill-pill">SQL Server</span>
-        <span class="skill-pill">Synapse SQL Pool</span>
-        <span class="skill-pill">Azure SQL DB</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="cert-bar reveal">
-    <div class="cert-logo">🏆</div>
-    <div class="cert-info">
-      <div class="cert-name">Microsoft Certified: Azure Fundamentals</div>
-      <div class="cert-issuer">AZ-900 · Microsoft</div>
+    <div class="tools-row rv">
+      <div class="tool-badge"><span class="ti">🔧</span>Git</div>
+      <div class="tool-badge"><span class="ti">🚀</span>Azure DevOps</div>
+      <div class="tool-badge"><span class="ti">🔄</span>CI/CD</div>
+      <div class="tool-badge"><span class="ti">🐧</span>Linux</div>
+      <div class="tool-badge"><span class="ti">💻</span>VS Code</div>
+      <div class="tool-badge"><span class="ti">📓</span>Jupyter</div>
+      <div class="tool-badge"><span class="ti">🏆</span>AZ-900 Certified</div>
     </div>
   </div>
 </section>
 
-<div class="divider"></div>
+<div class="div"></div>
 
-<!-- CONTACT -->
+<!-- ─── CONTACT ─── -->
 <section id="contact">
-  <div class="reveal">
+  <div class="rv">
     <h2 class="contact-heading">
-      <div class="accent">Let's build</div>
-      <div class="dim">something</div>
-      <div>together.</div>
+      <div class="l1">LET'S</div>
+      <div class="l2">BUILD</div>
+      <div class="l3">TOGETHER.</div>
     </h2>
-    <p class="contact-sub">Open to data engineering roles. If you're working on interesting data problems at scale — let's talk.</p>
-    <div class="contact-links">
-      <a href="mailto:adithkrishna59955@gmail.com" class="contact-link">
+    <p class="contact-sub">
+      Open to data engineering roles. If you're working on interesting data problems at scale — pipelines, lakehouses, real-time or batch — let's talk.
+    </p>
+    <div class="clinks">
+      <a href="mailto:adithkrishna59955@gmail.com" class="clink">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
         adithkrishna59955@gmail.com
       </a>
-      <a href="tel:+919947638259" class="contact-link">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 11.86a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/></svg>
+      <a href="tel:+919947638259" class="clink">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 11.86 19.79 19.79 0 0 1 1.08 3.19 2 2 0 0 1 3.06 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/></svg>
         +91 99476 38259
       </a>
-      <a href="https://linkedin.com/in/adith-krishna" target="_blank" class="contact-link">
+      <a href="https://linkedin.com/in/adith-krishna" target="_blank" rel="noopener" class="clink">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
         linkedin.com/in/adith-krishna
       </a>
-      <a href="https://github.com/adithkrishna" target="_blank" class="contact-link">
+      <a href="https://adithportfolio.netlify.app" target="_blank" rel="noopener" class="clink">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 1 0 20M12 2a14.5 14.5 0 0 0 0 20M2 12h20"/></svg>
+        adithportfolio.netlify.app
+      </a>
+      <a href="https://github.com/adithkrishna" target="_blank" rel="noopener" class="clink">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
         github.com/adithkrishna
       </a>
     </div>
   </div>
   <footer>
-    <div class="footer-left">© 2025 Adith Krishna — Data Engineer, Bengaluru</div>
-    <div class="footer-right">Built with precision · ADF · Fabric · PySpark</div>
+    <div class="footer-l">© 2025 Adith Krishna — Data Engineer, Bengaluru</div>
+    <div class="footer-r">ADF · Fabric · PySpark · Synapse</div>
   </footer>
 </section>
 
 <script>
-// ─── CURSOR ───
-const cursor = document.getElementById('cursor');
-const ring = document.getElementById('cursorRing');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{
-  mx=e.clientX;my=e.clientY;
-  cursor.style.left=mx+'px';cursor.style.top=my+'px';
-});
-function animRing(){
-  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
-  ring.style.left=rx+'px';ring.style.top=ry+'px';
-  requestAnimationFrame(animRing);
+/* ─── CURSOR ─── */
+const cur = document.getElementById('cur');
+const ring = document.getElementById('cur-r');
+if(cur && ring){
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+  (function animR(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animR);})();
+  document.querySelectorAll('a,button,.pc,.sg,.exp-proj,.pipe-step').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cur.classList.add('h');ring.classList.add('h');});
+    el.addEventListener('mouseleave',()=>{cur.classList.remove('h');ring.classList.remove('h');});
+  });
 }
-animRing();
-document.querySelectorAll('a,button,.project-card,.skill-group,.exp-project').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{cursor.classList.add('hovered');ring.classList.add('hovered');});
-  el.addEventListener('mouseleave',()=>{cursor.classList.remove('hovered');ring.classList.remove('hovered');});
+
+/* ─── MOBILE MENU ─── */
+const ham = document.getElementById('ham');
+const mob = document.getElementById('mobmenu');
+ham.addEventListener('click',()=>{
+  mob.classList.toggle('open');
+  const open = mob.classList.contains('open');
+  ham.children[0].style.transform = open ? 'rotate(45deg) translate(5px,5px)' : '';
+  ham.children[1].style.opacity = open ? '0' : '1';
+  ham.children[2].style.transform = open ? 'rotate(-45deg) translate(5px,-5px)' : '';
 });
+document.querySelectorAll('.mm-link').forEach(a=>a.addEventListener('click',()=>{
+  mob.classList.remove('open');
+  ham.children[0].style.transform='';
+  ham.children[1].style.opacity='1';
+  ham.children[2].style.transform='';
+}));
 
-// ─── SCROLL REVEAL ───
-const observer = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){e.target.classList.add('visible');}
-  });
-},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
-document.querySelectorAll('.reveal').forEach((el,i)=>{
-  el.style.transitionDelay=(i%5)*0.08+'s';
-  observer.observe(el);
-});
-
-// ─── PIPELINE ANIMATION ───
-let offset=0;
-const arrows=document.querySelectorAll('.p-arrow.animated');
-setInterval(()=>{
-  offset+=2;
-  arrows.forEach(a=>{
-    a.style.backgroundPosition=`${-offset}px 0`;
-  });
-},30);
-
-// ─── NAV ACTIVE STATE ───
-const sections=document.querySelectorAll('section[id]');
-const navLinks=document.querySelectorAll('.nav-links a');
-window.addEventListener('scroll',()=>{
-  let current='';
-  sections.forEach(s=>{
-    if(window.scrollY>=s.offsetTop-200)current=s.id;
-  });
-  navLinks.forEach(a=>{
-    a.style.color=a.getAttribute('href')==='#'+current?'var(--text)':'';
-  });
-},{ passive:true });
-
-// ─── STATS COUNT UP ───
-function countUp(el,target,duration=1200){
-  let start=0;const step=target/60;
-  const timer=setInterval(()=>{
-    start=Math.min(start+step,target);
-    el.textContent=Math.floor(start);
-    if(start>=target)clearInterval(timer);
-  },duration/60);
-}
-const statsObserver=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
+/* ─── SCROLL REVEAL ─── */
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{
     if(e.isIntersecting){
-      e.target.querySelectorAll('.stat-num').forEach(num=>{
-        const unit=num.querySelector('.unit');
-        const val=parseInt(num.textContent);
-        const unitText=unit?unit.outerHTML:'';
-        num.innerHTML=`<span class="count">0</span>${unitText}`;
-        countUp(num.querySelector('.count'),val);
-      });
-      statsObserver.unobserve(e.target);
+      setTimeout(()=>e.target.classList.add('vis'),i*40);
     }
   });
-},{threshold:0.5});
-document.querySelector('.hero-stats')&&statsObserver.observe(document.querySelector('.hero-stats'));
+},{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.rv,.rv-l,.rv-r').forEach((el,i)=>{
+  el.style.transitionDelay = (i%6)*.06+'s';
+  obs.observe(el);
+});
+
+/* ─── COUNT UP ─── */
+function countUp(el){
+  const to = +el.dataset.to;
+  let n=0;const step=to/40;
+  const t=setInterval(()=>{
+    n=Math.min(n+step,to);
+    el.textContent=Math.round(n);
+    if(n>=to)clearInterval(t);
+  },30);
+}
+const statObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.cnt').forEach(countUp);
+      statObs.unobserve(e.target);
+    }
+  });
+},{threshold:.5});
+const statRow = document.querySelector('.stats-row');
+if(statRow) statObs.observe(statRow);
+
+/* ─── PIPELINE STEP CYCLE ─── */
+const steps = document.querySelectorAll('.pipe-step');
+let si=0;
+setInterval(()=>{
+  steps.forEach(s=>s.classList.remove('active'));
+  si=(si+1)%steps.length;
+  steps[si].classList.add('active');
+},1400);
+
+/* ─── NAV ACTIVE ─── */
+const secs = document.querySelectorAll('section[id]');
+const nls = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  secs.forEach(s=>{if(window.scrollY>=s.offsetTop-200)cur=s.id;});
+  nls.forEach(a=>{
+    a.style.color=a.getAttribute('href')==='#'+cur?'var(--text)':'';
+  });
+},{passive:true});
 </script>
 </body>
 </html>
